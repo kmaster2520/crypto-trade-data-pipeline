@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Deploys a single EC2 instance from a custom AMI for running a persistent Python WebSocket consumer (e.g., Binance → Kinesis).
+  Uses minimal configuration: private subnet recommended, outbound-only access.
+
+Parameters:
+  AmiId:
+    Type: AWS::EC2::Image::Id
+    Description: The ID of your custom AMI (e.g., ami-0123456789abcdef0)
+  InstanceType:
+    Type: String
+    Default: t4g.nano
+    AllowedValues:
+      - t4g.nano
+      - t4g.micro
+      - t3.nano
+      - t3.micro
+    Description: EC2 instance type (Graviton ARM preferred for cost/efficiency)
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access (optional but useful for debugging)
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The ID of the subnet to launch the instance in (use a private subnet for security)
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group ID allowing outbound traffic (HTTPS/9443 for Binance, AWS services)
+  IamInstanceProfile:
+    Type: String
+    Description: Name of the IAM instance profile/role (must allow Kinesis:PutRecord*, logs, etc.)
+    Default: ""   # Optional – leave empty if not using
+
+Conditions:
+  HasKeyName: !Not [ !Equals [!Ref KeyName, ""] ]
+  HasInstanceProfile: !Not [ !Equals [!Ref IamInstanceProfile, ""] ]
+
+Resources:
+  BinanceConsumerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !If [HasKeyName, !Ref KeyName, !Ref "AWS::NoValue"]
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
+      IamInstanceProfile: !If [HasInstanceProfile, !Ref IamInstanceProfile, !Ref "AWS::NoValue"]
+      # Optional: Enable detailed monitoring (costs extra ~$0.015/hour)
+      Monitoring: false
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          dnf update -y
+          dnf install -y python3.12 python3.12-pip python3.12-devel
+
+          PYTHON=/usr/bin/python3.12
+          PIP=/usr/bin/pip3.12
+
+          aws s3 cp s3://greatestbucketever/websocket_folder/websocket_script.py /root/websocket_script.py
+          $PIP install boto3==1.42.67 websockets==16.0   # lock versions for stability
+
+          cat > /etc/systemd/system/binance_websocket.service << EOL
+          [Unit]
+          Description=Binance Websocket Script
+          StartLimitIntervalSec=0
+
+          [Service]
+          User=root
+          Type=simple
+          Restart=always
+          RestartSec=1
+          ExecStart=$PYTHON /root/websocket_script.py 1000
+
+          [Install]
+          WantedBy=multi-user.target
+          EOL
+
+          systemctl daemon-reload
+          systemctl enable binance_websocket.service
+          sleep 3
+          systemctl restart binance_websocket.service
+      Tags:
+        - Key: Application
+          Value: BinanceDataFlow
+
+Outputs:
+  InstanceId:
+    Description: The instance ID of the launched EC2 instance
+    Value: !Ref BinanceConsumerInstance
+  PrivateIp:
+    Description: Private IP address of the instance
+    Value: !GetAtt BinanceConsumerInstance.PrivateIp
+  AvailabilityZone:
+    Description: AZ where the instance launched
+    Value: !GetAtt BinanceConsumerInstance.AvailabilityZone

@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Group for the EC2 instance that runs the Websocket Script'
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The ID of the VPC where the security group will be created.
+  InstanceConnectSubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: The ID of the subnet for the EC2 instance connect endpoint
+
+Resources:
+  BinanceInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH and HTTP access via port 22 and 80
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: Allow SSH access from anywhere
+        - IpProtocol: tcp
+          FromPort: 2222
+          ToPort: 2222
+          CidrIp: 0.0.0.0/0
+          Description: Enable EC2 Instance connect
+      Tags:
+        - Key: Application
+          Value: BinanceDataFlow
+  BinanceKinesisEndpointGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable Access from EC2 instances
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Allow https access from anywhere
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Allow http access from anywhere
+  BinanceInstanceInstaceConnect:
+    Type: AWS::EC2::InstanceConnectEndpoint
+    Properties:
+      PreserveClientIp: true
+      SubnetId: !Ref InstanceConnectSubnetId
+Outputs:
+  InstanceSGId:
+    Description: The ID of the created instance security group
+    Value: !Ref BinanceInstanceSecurityGroup
+  KinesisEndpointSGId:
+    Description: The ID of the created kinesis endpoint security group
+    Value: !Ref BinanceKinesisEndpointGroup

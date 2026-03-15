@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Group for the EC2 instance that runs the Websocket Script'
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket where Python script is stored
+  KinesisStreamArn:
+    Type: String
+    Description: Target Kinesis Stream ARN
+    AllowedPattern: "^arn:aws:kinesis:[a-z0-9-]+:391262527903:stream/.+"
+
+Resources:
+  BinanceWebsocketInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: btc-binance-instance-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Description: String
+      Policies:
+        - PolicyName: btc-websocket-instance-kinesis
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: IamListAccess
+                Effect: Allow
+                Action:
+                  - "kinesis:PutRecord"
+                  - "kinesis:PutRecords"
+                Resource: !Ref KinesisStreamArn
+        - PolicyName: btc-websocket-instance-s3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: RetrieveS3ScriptFiles
+                Effect: Allow
+                Action:
+                  - "s3:ListBucket"
+                Resource: !Sub "arn:aws:s3:::${BucketName}"
+                Condition:
+                  StringLike:
+                    s3:prefix:
+                      - "websocket_folder"
+                      - "websocket_folder/"
+              - Sid: GetFiles
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                Resource: !Sub "arn:aws:s3:::${BucketName}/websocket_folder/*"

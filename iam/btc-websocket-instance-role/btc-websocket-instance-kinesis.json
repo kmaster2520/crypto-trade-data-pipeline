@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowWriteToSpecificKinesisStream",
+      "Effect": "Allow",
+      "Action": [
+        "kinesis:PutRecord",
+        "kinesis:PutRecords"
+      ],
+      "Resource": "arn:aws:kinesis:us-east-1:391262527903:stream/raw-trade-data"
+    }
+  ]
+}

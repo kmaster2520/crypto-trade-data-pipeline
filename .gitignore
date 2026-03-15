@@ -1,0 +1,11 @@
+*.DS_Store
+.idea/
+
+*.py[cdo]
+
+venv/
+.venv/
+env/
+.env/
+
+zzz*
