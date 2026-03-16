@@ -71,7 +71,7 @@ Resources:
           Type=simple
           Restart=always
           RestartSec=1
-          ExecStart=$PYTHON /root/websocket_script.py 1000
+          ExecStart=$PYTHON /root/websocket_script.py 5000
 
           [Install]
           WantedBy=multi-user.target

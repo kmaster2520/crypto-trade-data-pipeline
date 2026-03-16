@@ -10,3 +10,4 @@ WHERE
     eventType = 'aggTrade'
     and symbol = 'BTCUSDT'
     and timestamp >= current_timestamp() - INTERVAL 90 DAY
+    and timestamp >= '2026-03-15'

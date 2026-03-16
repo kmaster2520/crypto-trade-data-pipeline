@@ -18,7 +18,7 @@ dir(context)
 ]
 '''
 
-'''
+
 EXAMPLE_EVENT = {
     "invocationId": "085d3401-c076-4054-b657-2a1c01dd107c",
     "sourceKinesisStreamArn": "arn:aws:kinesis:us-east-1:391262527903:stream/raw-trade-data",
@@ -28,7 +28,8 @@ EXAMPLE_EVENT = {
         {
             "recordId": "shardId-00000000000200000000000000000000000000000000000000000000000000000000000000000000000049669534775090560008083220088837278296638367081844178978000000000000",
             "approximateArrivalTimestamp": 1765030657336,
-            "data": "eyJlIjoiYWdnVHJhZGUiLCJFIjoxNzY0NzMxNzk5Nzg1LCJzIjoiQlRDVVNEVCIsImEiOjI5MzIxMzU2LCJwIjoiOTI1NTkuODMwMDAwMDAiLCJxIjoiMC4wMDEwODAwMCIsImYiOjMwOTM4NDI3LCJsIjozMDkzODQyNywiVCI6MTc2NDczMTc5OTc4NCwibSI6dHJ1ZSwiTSI6dHJ1ZX0=",
+            #"data": "eyJlIjoiYWdnVHJhZGUiLCJFIjoxNzY0NzMxNzk5Nzg1LCJzIjoiQlRDVVNEVCIsImEiOjI5MzIxMzU2LCJwIjoiOTI1NTkuODMwMDAwMDAiLCJxIjoiMC4wMDEwODAwMCIsImYiOjMwOTM4NDI3LCJsIjozMDkzODQyNywiVCI6MTc2NDczMTc5OTc4NCwibSI6dHJ1ZSwiTSI6dHJ1ZX0=",
+            "data": "eyJ0eXBlIjoidGlja2VyIiwic2VxdWVuY2UiOjEyNDIxODk2NjE3MywicHJvZHVjdF9pZCI6IkJUQy1VU0QiLCJwcmljZSI6IjczODQwLjkzIiwib3Blbl8yNGgiOiI3MTgzMi4wMSIsInZvbHVtZV8yNGgiOiIxMjE1My4yMzYxMDk2MCIsImxvd18yNGgiOiI3MTMyOC4wMSIsImhpZ2hfMjRoIjoiNzQ1NDcuNSIsInZvbHVtZV8zMGQiOiIzMDA2MDcuODI0ODI1ODkiLCJiZXN0X2JpZCI6IjczODQwLjkyIiwiYmVzdF9iaWRfc2l6ZSI6IjAuMDAwNTAwMDAiLCJiZXN0X2FzayI6IjczODQwLjkzIiwiYmVzdF9hc2tfc2l6ZSI6IjAuMDQxNDA3MDgiLCJzaWRlIjoiYnV5IiwidGltZSI6IjIwMjYtMDMtMTZUMTc6MzY6NDYuNjAzMzY4WiIsInRyYWRlX2lkIjo5ODE2OTczMDgsImxhc3Rfc2l6ZSI6IjAuMDA0NTQzIn0=",
             "kinesisRecordMetadata": {
                 "sequenceNumber": "49669534775090560008083220088837278296638367081844178978",
                 "subsequenceNumber": 0,
@@ -39,9 +40,10 @@ EXAMPLE_EVENT = {
         }
     ]
 }
-'''
+
 '''
 Example Event (decoded):
+BINANCE
 {
     "e":"aggTrade",
     "E":1764731799785,
@@ -55,6 +57,28 @@ Example Event (decoded):
     "m":true,
     "M":true
 }
+
+COINBASE
+{
+  "type": "ticker",
+  "sequence": 124218966173,
+  "product_id": "BTC-USD",
+  "price": "73840.93",
+  "open_24h": "71832.01",
+  "volume_24h": "12153.23610960",
+  "low_24h": "71328.01",
+  "high_24h": "74547.5",
+  "volume_30d": "300607.82482589",
+  "best_bid": "73840.92",
+  "best_bid_size": "0.00050000",
+  "best_ask": "73840.93",
+  "best_ask_size": "0.04140708",
+  "side": "buy",
+  "time": "2026-03-16T17:36:46.603368Z",
+  "trade_id": 981697308,
+  "last_size": "0.004543"
+}
+
 '''
 
 
@@ -76,26 +100,50 @@ def lambda_handler(event, context):
             print(exc)
             continue
 
-        event_time = int(item.get("E")) // 1000
-        if not event_time:
-            continue
+        processed_item = {}
 
-        processed_item = {
-            "eventType": item.get("e", ""),
-            "symbol": item.get("s", "(none)"),
-            "price": item.get("p", "0.0"),
-            "quantity": item.get("q", "0.0"),
-            "eventId": item.get("a", 0),
-            "lambdaRequestId": context.aws_request_id,
-            "timestamp": datetime.fromtimestamp(event_time, tz=timezone.utc).isoformat()
-        }
+        # BINANCE
+        if item.get("e"):
+            event_time = int(item.get("E")) // 1000
+            if not event_time:
+                continue
+
+            processed_item = {
+                "eventType": item.get("e", ""),
+                "symbol": item.get("s", "(none)"),
+                "price": item.get("p", "0.0"),
+                "quantity": item.get("q", "0.0"),
+                "eventId": item.get("a", 0),
+                "lambdaRequestId": context.aws_request_id,
+                "timestamp": datetime.fromtimestamp(event_time, tz=timezone.utc).isoformat()
+            }
+
+        # COINBASEs
+        elif item.get("type"):
+            event_time = item.get("time")
+            if not event_time:
+                continue
+
+            processed_item = {
+                "eventType": item.get("type", ""),
+                "symbol": item.get("product_id", "(none)"),
+                "price": item.get("price", "0.0"),
+                "quantity": item.get("last_size", "0.0"),
+                "eventId": item.get("trade_id", 0),
+                "lambdaRequestId": context.aws_request_id,
+                "timestamp": event_time
+            }
+
+        else:
+            continue
 
         print(partition_key)
         print(json.dumps(processed_item))
+
         transformed_records.append({
-                "recordId": evt.get("recordId", ""),
-                "result": "Ok",
-                "data": base64.b64encode(json.dumps(processed_item).encode("ascii")).decode("ascii")
+            "recordId": evt.get("recordId", ""),
+            "result": "Ok",
+            "data": base64.b64encode(json.dumps(processed_item).encode("ascii")).decode("ascii")
         })
         print()
 
@@ -107,4 +155,4 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     class EventContext:
         aws_request_id = "d"
-    lambda_handler(EXAMPLE_EVENT, EventContext)
+    print(lambda_handler(EXAMPLE_EVENT, EventContext))
