@@ -35,25 +35,21 @@ base64:
 
 
 
-async def begin_stream(count=10):
-    url = "wss://ws-feed.exchange.coinbase.com"
+async def begin_stream():
+    url = "wss://advanced-trade-ws.coinbase.com"
 
     partition_key = "BTC-USD"
-    channels = [
-        {
-          "name": "ticker_batch",
-          "product_ids": [partition_key]
-        }
-    ]
 
     subscribe_message = {
         "type": "subscribe",
-        "channels": channels
+        "channel": "market_trades",
+        "product_ids": [partition_key]
     }
 
     unsubscribe_message = {
         "type": "unsubscribe",
-        "channels": channels
+        "channel": subscribe_message["channel"],
+        "product_ids": subscribe_message["product_ids"]
     }
 
     region = os.getenv("AWS_REGION", "us-east-1")
@@ -63,11 +59,9 @@ async def begin_stream(count=10):
 
         print(f"Subscribing to websocket")
         await ws.send(json.dumps(subscribe_message))
-        subscribe_response = await ws.recv()
-        print(subscribe_response) # stringified json
 
         try:
-            for i in range(count):
+            while True:
                 res = await ws.recv()
                 print(res)
                 #kinesis_client.put_record(
@@ -86,5 +80,4 @@ async def begin_stream(count=10):
             print(unsubscribe_response)
 
 if __name__ == "__main__":
-    count = int(sys.argv[1])
-    asyncio.run(begin_stream(count=count))
+    asyncio.run(begin_stream())

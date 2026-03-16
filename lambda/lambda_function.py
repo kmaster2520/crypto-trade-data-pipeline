@@ -29,7 +29,7 @@ EXAMPLE_EVENT = {
             "recordId": "shardId-00000000000200000000000000000000000000000000000000000000000000000000000000000000000049669534775090560008083220088837278296638367081844178978000000000000",
             "approximateArrivalTimestamp": 1765030657336,
             #"data": "eyJlIjoiYWdnVHJhZGUiLCJFIjoxNzY0NzMxNzk5Nzg1LCJzIjoiQlRDVVNEVCIsImEiOjI5MzIxMzU2LCJwIjoiOTI1NTkuODMwMDAwMDAiLCJxIjoiMC4wMDEwODAwMCIsImYiOjMwOTM4NDI3LCJsIjozMDkzODQyNywiVCI6MTc2NDczMTc5OTc4NCwibSI6dHJ1ZSwiTSI6dHJ1ZX0=",
-            "data": "eyJ0eXBlIjoidGlja2VyIiwic2VxdWVuY2UiOjEyNDIxODk2NjE3MywicHJvZHVjdF9pZCI6IkJUQy1VU0QiLCJwcmljZSI6IjczODQwLjkzIiwib3Blbl8yNGgiOiI3MTgzMi4wMSIsInZvbHVtZV8yNGgiOiIxMjE1My4yMzYxMDk2MCIsImxvd18yNGgiOiI3MTMyOC4wMSIsImhpZ2hfMjRoIjoiNzQ1NDcuNSIsInZvbHVtZV8zMGQiOiIzMDA2MDcuODI0ODI1ODkiLCJiZXN0X2JpZCI6IjczODQwLjkyIiwiYmVzdF9iaWRfc2l6ZSI6IjAuMDAwNTAwMDAiLCJiZXN0X2FzayI6IjczODQwLjkzIiwiYmVzdF9hc2tfc2l6ZSI6IjAuMDQxNDA3MDgiLCJzaWRlIjoiYnV5IiwidGltZSI6IjIwMjYtMDMtMTZUMTc6MzY6NDYuNjAzMzY4WiIsInRyYWRlX2lkIjo5ODE2OTczMDgsImxhc3Rfc2l6ZSI6IjAuMDA0NTQzIn0=",
+            "data": "eyJjaGFubmVsIjoibWFya2V0X3RyYWRlcyIsInRpbWVzdGFtcCI6IjIwMjYtMDMtMTZUMjA6MzM6MjQuNzk5MTE3MjAzWiIsInNlcXVlbmNlX251bSI6MTAsImV2ZW50cyI6W3sidHlwZSI6InVwZGF0ZSIsInRyYWRlcyI6W3sicHJvZHVjdF9pZCI6IkJUQy1VU0QiLCJ0cmFkZV9pZCI6Ijk4MTgwNDk1NSIsInByaWNlIjoiNzQwNDAiLCJzaXplIjoiMC4wMDAwODQyNCIsInRpbWUiOiIyMDI2LTAzLTE2VDIwOjMzOjI0Ljc2MzQ5NVoiLCJzaWRlIjoiU0VMTCJ9LHsicHJvZHVjdF9pZCI6IkJUQy1VU0QiLCJ0cmFkZV9pZCI6Ijk4MTgwNDk1NCIsInByaWNlIjoiNzQwMzcuNTYiLCJzaXplIjoiMC4wMDAxMTc3NSIsInRpbWUiOiIyMDI2LTAzLTE2VDIwOjMzOjI0LjcyMzA2MloiLCJzaWRlIjoiU0VMTCJ9LHsicHJvZHVjdF9pZCI6IkJUQy1VU0QiLCJ0cmFkZV9pZCI6Ijk4MTgwNDk1MyIsInByaWNlIjoiNzQwMzciLCJzaXplIjoiMC4wMDAxNDk3IiwidGltZSI6IjIwMjYtMDMtMTZUMjA6MzM6MjQuNzIzMDYyWiIsInNpZGUiOiJTRUxMIn1dfV19",
             "kinesisRecordMetadata": {
                 "sequenceNumber": "49669534775090560008083220088837278296638367081844178978",
                 "subsequenceNumber": 0,
@@ -60,23 +60,40 @@ BINANCE
 
 COINBASE
 {
-  "type": "ticker",
-  "sequence": 124218966173,
-  "product_id": "BTC-USD",
-  "price": "73840.93",
-  "open_24h": "71832.01",
-  "volume_24h": "12153.23610960",
-  "low_24h": "71328.01",
-  "high_24h": "74547.5",
-  "volume_30d": "300607.82482589",
-  "best_bid": "73840.92",
-  "best_bid_size": "0.00050000",
-  "best_ask": "73840.93",
-  "best_ask_size": "0.04140708",
-  "side": "buy",
-  "time": "2026-03-16T17:36:46.603368Z",
-  "trade_id": 981697308,
-  "last_size": "0.004543"
+  "channel": "market_trades",
+  "timestamp": "2026-03-16T20:33:24.799117203Z",
+  "sequence_num": 10,
+  "events": [
+    {
+      "type": "update",
+      "trades": [
+        {
+          "product_id": "BTC-USD",
+          "trade_id": "981804955",
+          "price": "74040",
+          "size": "0.00008424",
+          "time": "2026-03-16T20:33:24.763495Z",
+          "side": "SELL"
+        },
+        {
+          "product_id": "BTC-USD",
+          "trade_id": "981804954",
+          "price": "74037.56",
+          "size": "0.00011775",
+          "time": "2026-03-16T20:33:24.723062Z",
+          "side": "SELL"
+        },
+        {
+          "product_id": "BTC-USD",
+          "trade_id": "981804953",
+          "price": "74037",
+          "size": "0.0001497",
+          "time": "2026-03-16T20:33:24.723062Z",
+          "side": "SELL"
+        }
+      ]
+    }
+  ]
 }
 
 '''
@@ -89,7 +106,7 @@ def lambda_handler(event, context):
 
     for evt in event.get("records", []):
         item_b64 = evt.get("data", "")
-        partition_key = evt.get("kinesisRecordMetadata", {}).get("partitionKey", "")
+        #partition_key = evt.get("kinesisRecordMetadata", {}).get("partitionKey", "")
         try:
             item_string = base64.b64decode(item_b64.encode("ascii")).decode("ascii")
             item = json.loads(item_string)
@@ -100,52 +117,32 @@ def lambda_handler(event, context):
             print(exc)
             continue
 
-        processed_item = {}
-
-        # BINANCE
-        if item.get("e"):
-            event_time = int(item.get("E")) // 1000
-            if not event_time:
+        # COINBASE
+        if item.get("channel") == "market_trades":
+            if not item.get("timestamp"):
                 continue
 
-            processed_item = {
-                "eventType": item.get("e", ""),
-                "symbol": item.get("s", "(none)"),
-                "price": item.get("p", "0.0"),
-                "quantity": item.get("q", "0.0"),
-                "eventId": item.get("a", 0),
-                "lambdaRequestId": context.aws_request_id,
-                "timestamp": datetime.fromtimestamp(event_time, tz=timezone.utc).isoformat()
-            }
+            event_type = item.get("channel", "")
+            for item_event in item.get("events", []):
+                for trade in item_event.get("trades", []):
+                    processed_item = {
+                        "eventType": event_type,
+                        "symbol": trade.get("product_id", ""),
+                        "price": trade.get("price", "0.0"),
+                        "quantity": trade.get("size", "0.0"),
+                        "tradeId": trade.get("trade_id", "0"),
+                        "side": trade.get("side", ""),
+                        "tradeTime": trade.get("time", "")
+                    }
 
-        # COINBASEs
-        elif item.get("type"):
-            event_time = item.get("time")
-            if not event_time:
-                continue
-
-            processed_item = {
-                "eventType": item.get("type", ""),
-                "symbol": item.get("product_id", "(none)"),
-                "price": item.get("price", "0.0"),
-                "quantity": item.get("last_size", "0.0"),
-                "eventId": item.get("trade_id", 0),
-                "lambdaRequestId": context.aws_request_id,
-                "timestamp": event_time
-            }
+                    transformed_records.append({
+                        "recordId": evt.get("recordId", ""),
+                        "result": "Ok",
+                        "data": base64.b64encode(json.dumps(processed_item).encode("ascii")).decode("ascii")
+                    })
 
         else:
             continue
-
-        print(partition_key)
-        print(json.dumps(processed_item))
-
-        transformed_records.append({
-            "recordId": evt.get("recordId", ""),
-            "result": "Ok",
-            "data": base64.b64encode(json.dumps(processed_item).encode("ascii")).decode("ascii")
-        })
-        print()
 
     return {
         "records": transformed_records

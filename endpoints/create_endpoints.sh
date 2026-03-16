@@ -20,6 +20,7 @@ aws ec2 create-vpc-endpoint \
   --vpc-endpoint-type Interface \
   --subnet-ids subnet-0ac0bc58b5403af7b \
   --private-dns-enabled \
+  --security-group-ids sg-04b8c982d429175eb \
   --ip-address-type ipv4 \
   --client-token my-kinesis-endpoint-creation
 
