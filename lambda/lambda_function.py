@@ -1,7 +1,6 @@
 import base64
 import binascii
 import json
-from datetime import datetime, timezone
 
 
 '''
@@ -106,7 +105,6 @@ def lambda_handler(event, context):
 
     for evt in event.get("records", []):
         item_b64 = evt.get("data", "")
-        #partition_key = evt.get("kinesisRecordMetadata", {}).get("partitionKey", "")
         try:
             item_string = base64.b64decode(item_b64.encode("ascii")).decode("ascii")
             item = json.loads(item_string)
@@ -136,7 +134,7 @@ def lambda_handler(event, context):
                     }
 
                     transformed_records.append({
-                        "recordId": evt.get("recordId", ""),
+                        "recordId": f"{processed_item.get('tradeTime')}-{processed_item.get('tradeId')}",
                         "result": "Ok",
                         "data": base64.b64encode(json.dumps(processed_item).encode("ascii")).decode("ascii")
                     })

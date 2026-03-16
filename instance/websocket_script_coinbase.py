@@ -63,12 +63,11 @@ async def begin_stream():
         try:
             while True:
                 res = await ws.recv()
-                print(res)
-                #kinesis_client.put_record(
-                #    StreamName="raw-trade-data",
-                #    Data=res.encode('ascii'),
-                #    PartitionKey=partition_key
-                #)
+                kinesis_client.put_record(
+                    StreamName="raw-trade-data",
+                    Data=res.encode('ascii'),
+                    PartitionKey=partition_key
+                )
         except KeyboardInterrupt:
             print("keyboard interrupt")
         except Exception as e:
