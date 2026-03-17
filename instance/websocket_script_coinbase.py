@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 
 import websockets
 import json
@@ -34,15 +35,13 @@ base64:
 
 
 
-async def begin_stream():
+async def begin_stream(*, symbol="BTC-USD"):
     url = "wss://advanced-trade-ws.coinbase.com"
-
-    partition_key = "BTC-USD"
 
     subscribe_message = {
         "type": "subscribe",
         "channel": "market_trades",
-        "product_ids": [partition_key]
+        "product_ids": [symbol]
     }
 
     unsubscribe_message = {
@@ -65,7 +64,7 @@ async def begin_stream():
                 kinesis_client.put_record(
                     StreamName="raw-trade-data",
                     Data=res.encode('ascii'),
-                    PartitionKey=partition_key
+                    PartitionKey=symbol
                 )
         except KeyboardInterrupt:
             print("keyboard interrupt")
@@ -78,4 +77,8 @@ async def begin_stream():
             print(unsubscribe_response)
 
 if __name__ == "__main__":
-    asyncio.run(begin_stream())
+    if len(sys.argv) < 2:
+        symbol = "BTC-USD"
+    else:
+        symbol = str(sys.argv[1])
+    asyncio.run(begin_stream(symbol=symbol))
