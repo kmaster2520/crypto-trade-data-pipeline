@@ -3,7 +3,7 @@
 SUBNET_ID="subnet-0ac0bc58b5403af7b"
 
 aws cloudformation create-stack \
-  --stack-name CoinbaseWebsocketInstance \
+  --stack-name CoinbaseETHWebsocketInstance \
   --template-body file://websocket_instance_cft.yaml \
   --parameters \
       ParameterKey=AmiId,ParameterValue=ami-04aa82396fe417f2f \
