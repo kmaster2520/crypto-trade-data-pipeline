@@ -2,8 +2,11 @@
 
 SUBNET_ID="subnet-0ac0bc58b5403af7b"
 
+TICKER="BTC"
+COINBASE_TICKER="${TICKER}-USD"
+
 aws cloudformation create-stack \
-  --stack-name CoinbaseETHWebsocketInstance \
+  --stack-name Coinbase${TICKER}WebsocketInstance \
   --template-body file://websocket_instance_cft.yaml \
   --parameters \
       ParameterKey=AmiId,ParameterValue=ami-04aa82396fe417f2f \
@@ -11,4 +14,5 @@ aws cloudformation create-stack \
       ParameterKey=SecurityGroupId,ParameterValue=sg-06f51ddc0f1cb5760 \
       ParameterKey=IamInstanceProfile,ParameterValue=btc-binance-instance-role \
       ParameterKey=InstanceType,ParameterValue=t4g.nano \
+      ParameterKey=CoinbaseProductId,ParameterValue=$COINBASE_TICKER \
       ParameterKey=KeyName,ParameterValue=BinanceDataFlowKP

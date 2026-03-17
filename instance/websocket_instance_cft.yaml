@@ -30,6 +30,14 @@ Parameters:
     Type: String
     Description: Name of the IAM instance profile/role (must allow Kinesis:PutRecord*, logs, etc.)
     Default: ""
+  CoinbaseProductId:
+    Type: String
+    Default: BTC-USD
+    AllowedValues:
+      - BTC-USD
+      - ETH-USD
+      - LTC-USD
+    Description: Coinbase Product ID to stream from
 
 Conditions:
   HasKeyName: !Not [ !Equals [!Ref KeyName, ""] ]
@@ -71,7 +79,7 @@ Resources:
           Type=simple
           Restart=always
           RestartSec=1
-          ExecStart=$PYTHON $SCRIPT_PATH
+          ExecStart=$PYTHON $SCRIPT_PATH ${CoinbaseProductId}
 
           [Install]
           WantedBy=multi-user.target
