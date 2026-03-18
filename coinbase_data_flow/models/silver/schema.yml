@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: btc_timeseries
+    columns:
+      - name: tradeId
+        description: "Unique trade id"
+        tests:
+          - unique
+          - not_null
+  - name: eth_timeseries
+    columns:
+      - name: tradeId
+        description: "Unique trade id"
+        tests:
+          - unique
+          - not_null
