@@ -1,7 +1,8 @@
 {{ config(
     materialized = 'streaming_table',
     file_format = 'delta',
-    liquid_cluster_by = ['tradeTime', 'symbol']
+    liquid_cluster_by = ['tradeTime', 'symbol'],
+    post_hook = "DELETE FROM {{ this }} WHERE tradeTime < CURRENT_DATE() - INTERVAL '90 DAYS'"
 ) }}
 
 SELECT

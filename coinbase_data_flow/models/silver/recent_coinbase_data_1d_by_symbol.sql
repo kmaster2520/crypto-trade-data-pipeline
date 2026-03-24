@@ -1,12 +1,15 @@
-{{ config(materialized='incremental') }}
+{{ config(
+    materialized = 'incremental',
+    incremental_strategy = 'insert_overwrite',
+    cluster_by = ['symbol']
+) }}
 
 SELECT
     symbol,
-    COUNT(*) as total,
-    MAX(tradeTime) as latestTradeTime
+    COUNT(*) as totalTrades,
+    MAX(tradeTime) as latestTradeTime,
+    MIN(tradeTime) AS earliestTradeTime
 FROM
-    {{ ref('raw_coinbase_data') }}
-WHERE
-    tradeTime >= current_timestamp() - INTERVAL 1 DAY
+    {{ ref('recent_coinbase_data_1d') }}
 GROUP BY
     symbol
