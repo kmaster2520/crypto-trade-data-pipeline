@@ -23,4 +23,5 @@ FROM STREAM(
       ignoreCorruptFiles => 'true',
       recursiveFileLookup => 'true'
     )
-);
+)
+WHERE tradeTime >= CURRENT_TIMESTAMP() - INTERVAL '90 DAYS';
