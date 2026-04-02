@@ -7,7 +7,7 @@ catalog.
 
 ## Tools/Services Used
 
-TODO: INSERT ARCHITECTURE DIAGRAM
+![Architecture Diagram](images/arch_diagram.png)
 
 ### Data Ingestion
 
@@ -43,6 +43,8 @@ Data Models (Medallion Architecture)
 * Gold
   * btc_timeseries_minute - aggregate trade data by the minute for Bitcoin over the past 7 days
   * eth_timeseries_minute - aggregate trade data by the minute for Ethereum over the past 7 days
+
+![dbt DAG](images/dbt-dag.png)
 
 
 ### VPC Infrastructure
