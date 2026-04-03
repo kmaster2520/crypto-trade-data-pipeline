@@ -13,8 +13,14 @@ cdk deploy CryptoTradeEndpoints --context vpc_id=$VPC_ID --context subnet_id=$SU
 cdk synth CryptoTradeFirehose --context bucket_name=$BUCKET_NAME
 cdk deploy CryptoTradeFirehose --context bucket_name=$BUCKET_NAME
 
-cdk deploy CoinbaseECSCluster \
+cdk synth CryptoWebsocketApp \
   --context subnet_id=$SUBNET_ID \
-  --context vpc_id=VPC_ID \
+  --context vpc_id=$VPC_ID \
+  --context ecr_image_uri=$ECR_IMAGE_URI \
+  --context product_id=$PRODUCT_ID
+
+cdk deploy CryptoWebsocketApp \
+  --context subnet_id=$SUBNET_ID \
+  --context vpc_id=$VPC_ID \
   --context ecr_image_uri=$ECR_IMAGE_URI \
   --context product_id=$PRODUCT_ID

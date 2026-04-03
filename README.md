@@ -141,9 +141,9 @@ SUBNET_ID="<replace>"
 ECR_IMAGE_URI="<get-from-above>"
 PRODUCT_ID="BTC-USD,ETH-USD" # example values, can be changed
 
-cdk deploy CoinbaseECSCluster \
+cdk deploy CryptoWebsocketApp \
   --context subnet_id=$SUBNET_ID \
-  --context vpc_id=VPC_ID \
+  --context vpc_id=$VPC_ID \
   --context ecr_image_uri=$ECR_IMAGE_URI \
   --context product_id=$PRODUCT_ID
 ```

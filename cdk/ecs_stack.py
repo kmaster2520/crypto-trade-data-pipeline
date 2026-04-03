@@ -185,21 +185,24 @@ class EcsWebsocketStack(Stack):
         )
 
         # --- ECS Service: keep exactly one task running ---
-        service = ecs.Ec2Service(
+        service = ecs.CfnService(
             self,
             "EcsService",
             service_name="coinbase-websocket-service",
-            cluster=cluster,
-            task_definition=task_def,
+            cluster=cluster.cluster_arn,
+            task_definition=task_def.task_definition_arn,
             desired_count=1,
-            min_healthy_percent=0,
-            max_healthy_percent=100,
+            launch_type="EC2",
+            deployment_configuration=ecs.CfnService.DeploymentConfigurationProperty(
+                minimum_healthy_percent=0,
+                maximum_percent=100,
+            ),
+            tags=[cdk.CfnTag(key="Application", value="CoinbaseDataFlow")],
         )
-        cdk.Tags.of(service).add("Application", "CoinbaseDataFlow")
 
         # --- Outputs ---
         cdk.CfnOutput(self, "ClusterName", value=cluster.cluster_name)
-        cdk.CfnOutput(self, "ServiceArn", value=service.service_arn)
+        cdk.CfnOutput(self, "ServiceArn", value=service.attr_service_arn)
         cdk.CfnOutput(self, "TaskDefinitionArn", value=task_def.task_definition_arn)
-        cdk.CfnOutput(self, "InstanceSecurityGroup", value=instance_sg.security_group_id)
+        cdk.CfnOutput(self, "InstanceSecurityGroupId", value=instance_sg.security_group_id)
         cdk.CfnOutput(self, "LogGroupName", value=log_group.log_group_name)

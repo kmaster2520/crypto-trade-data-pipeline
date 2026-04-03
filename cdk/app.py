@@ -10,8 +10,8 @@ aws_account = os.getenv("AWS_ACCOUNT", "391262527903")
 aws_region = os.getenv("AWS_REGION", "us-east-1")
 env = cdk.Environment(account=aws_account, region=aws_region)
 
-FirehoseTransformStack(app, "CryptoTradeFirehose", env=env)
-EndpointsStack(app, "CryptoTradeEndpoints", env=env)
-EcsWebsocketStack(app, "EcsWebsocketStack", env=env)
+#FirehoseTransformStack(app, "CryptoTradeFirehose", env=env)
+#EndpointsStack(app, "CryptoTradeEndpoints", env=env)
+EcsWebsocketStack(app, "CryptoWebsocketApp", env=env)
 
 app.synth()
