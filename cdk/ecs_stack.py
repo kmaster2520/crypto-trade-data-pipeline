@@ -28,6 +28,7 @@ class EcsWebsocketStack(Stack):
             raise ValueError("Context variable 'ecr_image_uri' is required.")
 
         vpc = ec2.Vpc.from_lookup(self, "Vpc", vpc_id=vpc_id)
+        subnet = ec2.Subnet.from_subnet_id(self, "Subnet", subnet_id)
 
         # --- IAM: task role (container → Kinesis) ---
         task_role = iam.Role(
@@ -139,26 +140,18 @@ class EcsWebsocketStack(Stack):
         cdk.Tags.of(launch_template).add("Application", "CoinbaseDataFlow")
 
         # --- ASG: always exactly one container instance ---
-        autoscaling.CfnAutoScalingGroup(
+        asg = autoscaling.AutoScalingGroup(
             self,
             "AutoScalingGroup",
             auto_scaling_group_name="coinbase-websocket-ecs-asg",
-            min_size="0",
-            max_size="1",
-            desired_capacity="1",
-            vpc_zone_identifier=[subnet_id],
-            launch_template=autoscaling.CfnAutoScalingGroup.LaunchTemplateSpecificationProperty(
-                launch_template_id=launch_template.launch_template_id,
-                version=launch_template.latest_version_number,
-            ),
-            tags=[
-                autoscaling.CfnAutoScalingGroup.TagPropertyProperty(
-                    key="Application",
-                    value="CoinbaseDataFlow",
-                    propagate_at_launch=True,
-                )
-            ],
+            vpc=vpc,
+            vpc_subnets=ec2.SubnetSelection(subnets=[subnet]),
+            launch_template=launch_template,
+            min_capacity=0,
+            max_capacity=1,
+            desired_capacity=1,
         )
+        cdk.Tags.of(asg).add("Application", "CoinbaseDataFlow")
 
         # --- ECS Task Definition ---
         task_def = ecs.Ec2TaskDefinition(
