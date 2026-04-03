@@ -20,6 +20,9 @@ class FirehoseTransformStack(Stack):
 
         bucket_name = self.node.try_get_context("bucket_name")
 
+        if not bucket_name:
+            raise ValueError("Context variable 'bucket_name' is required. Pass with --context bucket_name=<id>")
+
         # --- Lambda transform ---
         lambda_role = iam.Role(
             self,
@@ -45,7 +48,7 @@ class FirehoseTransformStack(Stack):
             },
         )
 
-        fn = lambda_.Function(
+        lambda_transform_fn = lambda_.Function(
             self,
             "FirehoseTransformFunction",
             function_name="coinbase-firehose-transform",
@@ -59,7 +62,7 @@ class FirehoseTransformStack(Stack):
         )
 
         # --- Kinesis Data Stream ---
-        stream = kinesis.Stream(
+        kinesis_stream = kinesis.Stream(
             self,
             "RawTradeDataStream",
             stream_name=STREAM_NAME,
@@ -84,7 +87,7 @@ class FirehoseTransformStack(Stack):
                                 "kinesis:DescribeStream",
                                 "kinesis:ListShards",
                             ],
-                            resources=[stream.stream_arn],
+                            resources=[kinesis_stream.stream_arn],
                         )
                     ]
                 ),
@@ -93,7 +96,7 @@ class FirehoseTransformStack(Stack):
                         iam.PolicyStatement(
                             effect=iam.Effect.ALLOW,
                             actions=["lambda:InvokeFunction"],
-                            resources=[fn.function_arn],
+                            resources=[lambda_transform_fn.function_arn],
                         )
                     ]
                 ),
@@ -104,7 +107,6 @@ class FirehoseTransformStack(Stack):
                             actions=[
                                 "s3:AbortMultipartUpload",
                                 "s3:GetBucketLocation",
-                                "s3:GetObject",
                                 "s3:ListBucket",
                                 "s3:ListBucketMultipartUploads",
                                 "s3:PutObject",
@@ -141,7 +143,7 @@ class FirehoseTransformStack(Stack):
             delivery_stream_name=FIREHOSE_NAME,
             delivery_stream_type="KinesisStreamAsSource",
             kinesis_stream_source_configuration=firehose.CfnDeliveryStream.KinesisStreamSourceConfigurationProperty(
-                kinesis_stream_arn=stream.stream_arn,
+                kinesis_stream_arn=kinesis_stream.stream_arn,
                 role_arn=firehose_role.role_arn,
             ),
             extended_s3_destination_configuration=firehose.CfnDeliveryStream.ExtendedS3DestinationConfigurationProperty(
@@ -162,7 +164,7 @@ class FirehoseTransformStack(Stack):
                             parameters=[
                                 firehose.CfnDeliveryStream.ProcessorParameterProperty(
                                     parameter_name="LambdaArn",
-                                    parameter_value=fn.function_arn,
+                                    parameter_value=lambda_transform_fn.function_arn,
                                 ),
                                 firehose.CfnDeliveryStream.ProcessorParameterProperty(
                                     parameter_name="BufferSizeInMBs",
@@ -179,6 +181,6 @@ class FirehoseTransformStack(Stack):
             ),
         )
 
-        cdk.CfnOutput(self, "LambdaArn", value=fn.function_arn)
-        cdk.CfnOutput(self, "KinesisStreamArn", value=stream.stream_arn)
+        cdk.CfnOutput(self, "LambdaArn", value=lambda_transform_fn.function_arn)
+        cdk.CfnOutput(self, "KinesisStreamArn", value=kinesis_stream.stream_arn)
         cdk.CfnOutput(self, "FirehoseName", value=FIREHOSE_NAME)

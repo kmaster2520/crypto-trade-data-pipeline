@@ -8,4 +8,6 @@ venv/
 env/
 .env/
 
+**/cdk.out
+
 zzz*
