@@ -7,12 +7,12 @@ import json
 
 import boto3
 
-
+# defaults
 KINESIS_STREAM_NAME = "raw-trade-data"
-SYMBOL = "BTC-USD"  # default only
+SYMBOL = "BTC-USD"
 
 
-async def process_websocket_response(*, res, kinesis_client):
+async def process_websocket_response(*, res, kinesis_client, kinesis_stream_name):
     try:
         message = json.loads(res)
         channel = message.get("channel", "")
@@ -40,7 +40,7 @@ async def process_websocket_response(*, res, kinesis_client):
         if len(batch_records) > 0:
             await asyncio.to_thread(
                 kinesis_client.put_records,
-                StreamName=KINESIS_STREAM_NAME,
+                StreamName=kinesis_stream_name,
                 Records=batch_records
             )
     except json.JSONDecodeError as e:
@@ -49,7 +49,7 @@ async def process_websocket_response(*, res, kinesis_client):
         print('message handling error: ' + str(e))
 
 
-async def begin_stream(*, symbol="BTC-USD"):
+async def begin_stream(*, symbol, kinesis_stream_name):
     url = "wss://advanced-trade-ws.coinbase.com"
 
     subscribe_message = {
@@ -73,7 +73,13 @@ async def begin_stream(*, symbol="BTC-USD"):
             await ws.send(json.dumps(subscribe_message))
             while True:
                 res = await ws.recv()
-                tg.create_task(process_websocket_response(res=res, kinesis_client=kinesis_client))
+                tg.create_task(
+                    process_websocket_response(
+                        res=res,
+                        kinesis_client=kinesis_client,
+                        kinesis_stream_name=kinesis_stream_name
+                    )
+                )
         except KeyboardInterrupt:
             print("keyboard interrupt")
         except Exception as e:
@@ -87,4 +93,6 @@ async def begin_stream(*, symbol="BTC-USD"):
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         SYMBOL = str(sys.argv[1])
-    asyncio.run(begin_stream(symbol=SYMBOL))
+    if len(sys.argv) >= 3:
+        KINESIS_STREAM_NAME = str(sys.argv[2])
+    asyncio.run(begin_stream(symbol=SYMBOL, kinesis_stream_name=KINESIS_STREAM_NAME))

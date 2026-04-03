@@ -22,10 +22,14 @@ class EcsWebsocketStack(Stack):
         product_id = self.node.try_get_context("product_id") or "BTC-USD"
         instance_type = self.node.try_get_context("instance_type") or "t4g.micro"
 
+        if not vpc_id:
+            raise ValueError("Context variable 'vpc_id' is required.")
         if not subnet_id:
             raise ValueError("Context variable 'subnet_id' is required.")
         if not ecr_image_uri:
             raise ValueError("Context variable 'ecr_image_uri' is required.")
+        if not product_id:
+            raise ValueError("Context variable 'product_id' is required.")
 
         vpc = ec2.Vpc.from_lookup(self, "Vpc", vpc_id=vpc_id)
         subnet = ec2.Subnet.from_subnet_id(self, "Subnet", subnet_id)
@@ -34,7 +38,7 @@ class EcsWebsocketStack(Stack):
         task_role = iam.Role(
             self,
             "EcsTaskRole",
-            role_name="btc-websocket-ecs-task-role",
+            role_name="crypto-websocket-ecs-task-role",
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             inline_policies={
                 "KinesisWrite": iam.PolicyDocument(
@@ -54,7 +58,7 @@ class EcsWebsocketStack(Stack):
         execution_role = iam.Role(
             self,
             "EcsTaskExecutionRole",
-            role_name="btc-websocket-ecs-execution-role",
+            role_name="crypto-websocket-ecs-execution-role",
             assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name(
@@ -67,7 +71,7 @@ class EcsWebsocketStack(Stack):
         instance_role = iam.Role(
             self,
             "Ec2InstanceRole",
-            role_name="btc-websocket-ecs-instance-role",
+            role_name="crypto-websocket-ecs-instance-role",
             assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name(
@@ -84,7 +88,7 @@ class EcsWebsocketStack(Stack):
             self,
             "InstanceSecurityGroup",
             vpc=vpc,
-            security_group_name="coinbase-websocket-ec2-sg",
+            security_group_name="crypto-websocket-ec2-sg",
             description="Enable SSH and HTTPS access via port 22 and 443",
         )
         instance_sg.add_ingress_rule(
@@ -108,7 +112,7 @@ class EcsWebsocketStack(Stack):
         cluster = ecs.Cluster(
             self,
             "EcsCluster",
-            cluster_name="coinbase-websocket-cluster",
+            cluster_name="crypto-websocket-cluster",
         )
         cdk.Tags.of(cluster).add("Application", "CoinbaseDataFlow")
 
@@ -116,7 +120,7 @@ class EcsWebsocketStack(Stack):
         log_group = logs.LogGroup(
             self,
             "LogGroup",
-            log_group_name="/ecs/coinbase-websocket",
+            log_group_name="/ecs/crypto-websocket",
             retention=logs.RetentionDays.TWO_WEEKS,
             removal_policy=cdk.RemovalPolicy.RETAIN,
         )
@@ -125,7 +129,7 @@ class EcsWebsocketStack(Stack):
         launch_template = ec2.LaunchTemplate(
             self,
             "LaunchTemplate",
-            launch_template_name="coinbase-websocket-ecs-lt",
+            launch_template_name="crypto-websocket-ecs-lt",
             machine_image=ec2.MachineImage.from_ssm_parameter(
                 "/aws/service/ecs/optimized-ami/amazon-linux-2023/arm64/recommended/image_id"
             ),
@@ -136,14 +140,14 @@ class EcsWebsocketStack(Stack):
                 f"#!/bin/bash\necho ECS_CLUSTER={cluster.cluster_name} >> /etc/ecs/ecs.config"
             ),
         )
-        cdk.Tags.of(launch_template).add("Name", "coinbase-websocket-ecs-instance")
+        cdk.Tags.of(launch_template).add("Name", "crypto-websocket-ecs-instance")
         cdk.Tags.of(launch_template).add("Application", "CoinbaseDataFlow")
 
         # --- ASG: always exactly one container instance ---
         asg = autoscaling.AutoScalingGroup(
             self,
             "AutoScalingGroup",
-            auto_scaling_group_name="coinbase-websocket-ecs-asg",
+            auto_scaling_group_name="crypto-websocket-ecs-asg",
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnets=[subnet]),
             launch_template=launch_template,
@@ -157,7 +161,7 @@ class EcsWebsocketStack(Stack):
         task_def = ecs.Ec2TaskDefinition(
             self,
             "TaskDefinition",
-            family="coinbase-websocket",
+            family="crypto-websocket",
             network_mode=ecs.NetworkMode.BRIDGE,
             task_role=task_role,
             execution_role=execution_role,
@@ -181,7 +185,7 @@ class EcsWebsocketStack(Stack):
         service = ecs.CfnService(
             self,
             "EcsService",
-            service_name="coinbase-websocket-service",
+            service_name="crypto-websocket-service",
             cluster=cluster.cluster_arn,
             task_definition=task_def.task_definition_arn,
             desired_count=1,
