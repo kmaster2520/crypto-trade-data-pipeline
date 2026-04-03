@@ -128,46 +128,22 @@ docker push $ECR_IMAGE_URI
 
 #### Deploying the ECS Cluster and Task
 
-The ECS Cluster and Task are specified in the CloudFormation template `ecs/websocket_ecs_cft.yaml`.
-(Migration to CDK planned)
+The ECS Cluster and Task are specified in the CDK `cdk/ecs_stack.py`.
+This CDK contains everything related to the ECS task and infrastructure, including
+the instance's security group, and all required IAM policies and roles.
 
-To deploy the ECS stack for the first time, `cd` into the `ecs` folder and run (replace placeholders below):
+To deploy the CDK, run these commands (Set the correct environment variables for VPC ID and *private* subnet ID):
+
 ```commandline
-SUBNET_ID="<private subnet id>"
-SECURITY_GROUP_ID="<instance sg from endpoints deployment>"
-ECR_IMAGE_URI="<same as from image build>"
+VPC_ID="<replace>"
+SUBNET_ID="<replace>"
+ECR_IMAGE_URI="<get-from-above>"
+PRODUCT_ID="BTC-USD,ETH-USD" # example values, can be changed
 
-PRODUCT_IDS="BTC-USD,ETH-USD" # this is an example value, multiple streams must be separated by commas
-
-aws cloudformation create-stack \
-  --stack-name CoinbaseECSCluster \
-  --template-body file://websocket_ecs_cft.yaml \
-  --parameters \
-      ParameterKey=SubnetId,ParameterValue=$SUBNET_ID \
-      ParameterKey=SecurityGroupId,ParameterValue=$SECURITY_GROUP_ID \
-      ParameterKey=EcrImageUri,ParameterValue=$ECR_IMAGE_URI \
-      ParameterKey=CoinbaseProductId,ParameterValue="$PRODUCT_IDS" \
-  --capabilities CAPABILITY_NAMED_IAM
+cdk deploy CoinbaseECSCluster \
+  --context subnet_id=$SUBNET_ID \
+  --context vpc_id=VPC_ID \
+  --context ecr_image_uri=$ECR_IMAGE_URI \
+  --context product_id=$PRODUCT_ID
 ```
-
-To update the stack with a new list of product IDs to subscribe to (or simply rehydrate the setup):
-```commandline
-PRODUCT_IDS="BTC-USD,ETH-USD"
-#PRODUCT_IDS="LTC-USD"
-
-aws cloudformation deploy \
-  --stack-name CoinbaseECSCluster \
-  --template-file websocket_ecs_cft.yaml \
-  --parameter-overrides \
-      CoinbaseProductId="$PRODUCT_IDS" \
-  --capabilities CAPABILITY_NAMED_IAM
-```
-
-
-
-
-
-
-
-
 

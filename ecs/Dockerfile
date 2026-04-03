@@ -6,6 +6,7 @@
 # Push to ECR:
 #   aws login
 #   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 391262527903.dkr.ecr.us-east-1.amazonaws.com
+#   docker build -f ecs/Dockerfile -t coinbase-websocket .
 #   docker tag coinbase-websocket 391262527903.dkr.ecr.us-east-1.amazonaws.com/coinbase-websocket:latest
 #   docker push 391262527903.dkr.ecr.us-east-1.amazonaws.com/coinbase-websocket:latest
 
